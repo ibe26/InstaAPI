@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,5 +12,6 @@ namespace InstaAPI.Interfaces
         public Task InsertAsync(T parameter);
         public Task DeleteAsync(int ID);
         public Task<T> FindByID(int ID);
+        public Task Patch(int ID, JsonPatchDocument T);
     }
 }
