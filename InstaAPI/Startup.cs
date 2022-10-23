@@ -1,4 +1,5 @@
 using InstaAPI.Data;
+using InstaAPI.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -30,6 +31,7 @@ namespace InstaAPI
             services.AddControllers().AddNewtonsoftJson();
             services.AddCors();
             services.AddDbContext<DataContext>(options => options.UseSqlServer(Configuration.GetConnectionString("Default")));
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         }
 
@@ -41,10 +43,10 @@ namespace InstaAPI
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            app.UseCors(m => m.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

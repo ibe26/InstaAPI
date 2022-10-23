@@ -1,4 +1,5 @@
 ﻿using InstaAPI.Interfaces;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -37,6 +38,11 @@ namespace InstaAPI.Data.Repo
         public async Task InsertAsync(T parameter)
         {
             await _object.AddAsync(parameter);
+        }
+
+        public Task Patch(int ID, JsonPatchDocument T)
+        {
+            throw new NotImplementedException();
         }
     }
 }
