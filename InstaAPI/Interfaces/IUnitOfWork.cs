@@ -10,6 +10,7 @@ namespace InstaAPI.Interfaces
     {
         public IGenericRepository<Post> PostRepository { get; }
         public IGenericRepository<Comment> CommentRepository { get; }
+        public IGenericRepository<WhoLiked> WhoLikedRepository { get; }
         public Task<bool> SaveAsync();
     }
 }

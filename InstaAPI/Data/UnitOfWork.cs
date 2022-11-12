@@ -19,6 +19,7 @@ namespace InstaAPI.Data
         public IGenericRepository<Post> PostRepository => new GenericRepository<Post>(dataContext);
 
         public IGenericRepository<Comment> CommentRepository => new GenericRepository<Comment>(dataContext);
+        public IGenericRepository<WhoLiked> WhoLikedRepository => new GenericRepository<WhoLiked>(dataContext);
 
         public async Task<bool> SaveAsync()
         {

@@ -31,7 +31,8 @@ namespace InstaAPI.Controllers
                              post.ID,
                              post.Image,
                              post.Text,
-                             post.Title
+                             post.Title,
+                             post.WhoLiked
                          };
             return Ok(result);
         }
@@ -47,18 +48,57 @@ namespace InstaAPI.Controllers
                 Text = postDTO.Text,
                 Title = postDTO.Title,
                 UserID = postDTO.UserID,
-                LikeCount = 0
             };
+
             await uow.PostRepository.InsertAsync(post);
             await uow.SaveAsync();
 
             return Ok(200);
 
         }
-        //[HttpPost("like/{UserID}")]
-        //public async Task<IActionResult> LikePost(int UserID)
-        //{
+        ///api/like?&PostID=1UserID=5
+        [HttpPost("like")]
+        public async Task<IActionResult> LikePost(int UserID, int PostID)
+        {
+            if(!uow.WhoLikedRepository.GetListAsync().Result.Any(p=>p.UserID==UserID && p.PostID==PostID))
+            {
+                var whoLiked = new WhoLiked() { PostID = PostID, UserID = UserID };
 
-        //}
+                await uow
+                .WhoLikedRepository
+                .InsertAsync(whoLiked);
+                await uow.SaveAsync();
+            }
+            
+            
+            return Ok(200);
+        }
+        
+        [HttpPost("unlike")]
+        public async Task<IActionResult> UnlikePost(int UserID,int PostID)
+        {
+            //Checking if this UserID liked this post before
+            
+            if(uow.WhoLikedRepository.GetListAsync().Result.Any(p => p.UserID == UserID && p.PostID == PostID))
+            {
+                var whoLiked = uow
+                .WhoLikedRepository
+                .GetListAsync()
+                .Result
+                .Where(p => p.UserID == UserID && p.PostID == PostID)
+                .FirstOrDefault()
+                .ID;
+
+                await uow
+                .WhoLikedRepository
+                .DeleteAsync(whoLiked);
+
+                await uow.SaveAsync();
+                return Ok(200);
+            }
+
+
+            return BadRequest("Attempted to unlike the post, even though didn't like.");
+        }
     }
 }

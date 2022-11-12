@@ -14,5 +14,6 @@ namespace InstaAPI.Data
         public DbSet<Post> Posts { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Comment> Comment { get; set; }
+        public DbSet<WhoLiked> WhoLiked { get; set; }
     }
 }
