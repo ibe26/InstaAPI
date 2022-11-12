@@ -68,10 +68,11 @@ namespace InstaAPI.Controllers
                 .WhoLikedRepository
                 .InsertAsync(whoLiked);
                 await uow.SaveAsync();
+                return Ok(200);
+
             }
-            
-            
-            return Ok(200);
+
+            return BadRequest("Either a non-existing user tried to like or the post doesn't exist.");
         }
         
         [HttpPost("unlike")]
