@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace InstaAPI.Model
 {
-    public class PostDTO
+    public class PostBase
     {
         public string Title { get; set; }
         public string Text { get; set; }

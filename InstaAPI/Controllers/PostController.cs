@@ -23,8 +23,12 @@ namespace InstaAPI.Controllers
         public async Task<IActionResult> GetPosts(int UserID)
         {
             IEnumerable<Post> posts = await uow.PostRepository.GetListAsync();
+            IEnumerable<User> users = await uow.UserRepository.GetListAsync();
+            IEnumerable<WhoLiked> whoLikeds = await uow.WhoLikedRepository.GetListAsync();
             var result = from post in posts
+                         from user in users
                          where post.UserID == UserID
+                         where user.UserID==UserID
                          select new
                          {
                              post.Date,
@@ -32,13 +36,15 @@ namespace InstaAPI.Controllers
                              post.Image,
                              post.Text,
                              post.Title,
-                             post.WhoLiked
+                             post.WhoLiked,
+                             user.Nickname,
+                             
                          };
             return Ok(result);
         }
 
         [HttpPost("add")]
-        public async Task<IActionResult> AddPost(PostDTO postDTO)
+        public async Task<IActionResult> AddPost(PostBase postDTO)
         {
 
             Post post = new Post()
@@ -60,6 +66,15 @@ namespace InstaAPI.Controllers
         [HttpPost("like")]
         public async Task<IActionResult> LikePost(int UserID, int PostID)
         {
+            if(!PostExist(PostID))
+            {
+                return BadRequest("Attempted to like a post that doesn't exist.");
+            }
+            if(!UserExist(UserID))
+            {
+                return BadRequest("A non-existing user tried to like a post");
+            }
+
             if(!uow.WhoLikedRepository.GetListAsync().Result.Any(p=>p.UserID==UserID && p.PostID==PostID))
             {
                 var whoLiked = new WhoLiked() { PostID = PostID, UserID = UserID };
@@ -101,5 +116,15 @@ namespace InstaAPI.Controllers
 
             return BadRequest("Attempted to unlike the post, even though didn't like.");
         }
+
+        private bool PostExist(int PostID)
+        {
+            return uow.PostRepository.GetListAsync().Result.Any(p => p.ID == PostID);
+        }
+        private bool UserExist(int UserID)
+        {
+            return uow.UserRepository.GetListAsync().Result.Any(u => u.UserID == UserID);
+        }
+
     }
 }
