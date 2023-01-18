@@ -9,7 +9,6 @@ namespace InstaAPI.Model
     {
         public int UserID { get; set; }
         public string Nickname { get; set; }
-        public int MyProperty { get; set; }
         public virtual ICollection<Post> Posts { get; set; }
     }
 }
