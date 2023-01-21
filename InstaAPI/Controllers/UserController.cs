@@ -23,7 +23,26 @@ namespace InstaAPI.Controllers
             this.uow = uow;
         }
 
+        private string CreateJWT(LoginReq user)
+        {
+            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(user.Password+"TOKENTEST123123123123123"));
+            var claims = new Claim[]
+            {
+                new Claim(ClaimTypes.Email,user.Email)
+            };
 
+            var signingCredantials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddDays(30),
+                SigningCredentials = signingCredantials
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDTO registerUser)
         {
