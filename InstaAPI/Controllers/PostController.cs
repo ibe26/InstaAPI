@@ -43,7 +43,7 @@ namespace InstaAPI.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<IActionResult> AddPost(PostBase postDTO)
+        public async Task<IActionResult> AddPost(PostDTO postDTO)
         {
 
             Post post = new Post()

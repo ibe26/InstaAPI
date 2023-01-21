@@ -4,45 +4,57 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace InstaAPI.Data.Repo
 {
-    public class GenericRepository<T> : IGenericRepository<T> where T : class
+    public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : class
     {
         private readonly DataContext dataContext;
-        private DbSet<T> _object;
+        private DbSet<TEntity> _object;
 
         public GenericRepository(DataContext dataContext)
         {
             this.dataContext = dataContext;
-            _object = dataContext.Set<T>();
+            _object = dataContext.Set<TEntity>();
         }
         public async Task DeleteAsync(int ID)
         {
-            T t = await this.FindByID(ID);
-            _object.Remove(t);
+            TEntity TEntity = await FindByID(ID);
+            _object.Remove(TEntity);
         }
 
-        public async Task<T> FindByID(int ID)
+        public async Task<TEntity> FindByID(int ID)
         {
             return await _object.FindAsync(ID);
 
         }
 
-        public async Task<IEnumerable<T>> GetListAsync()
+        public async Task<IEnumerable<TEntity>> GetListAsync()
         {
             return await _object.ToListAsync();
         }
 
-        public async Task InsertAsync(T parameter)
+        public async Task InsertAsync(TEntity parameter)
         {
             await _object.AddAsync(parameter);
         }
 
-        public Task Patch(int ID, JsonPatchDocument T)
+        public Task Patch(int ID, JsonPatchDocument TEntity)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<TEntity> SingleOrDefault(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await _object.SingleOrDefaultAsync(predicate);
+        }
+
+        public async Task<IEnumerable<TEntity>> Where(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await _object.Where(predicate).ToListAsync();
+
         }
     }
 }
