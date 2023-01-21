@@ -22,6 +22,7 @@ namespace InstaAPI.Data
         public IGenericRepository<WhoLiked> WhoLikedRepository => new GenericRepository<WhoLiked>(dataContext);
         public IGenericRepository<User> UserRepository => new GenericRepository<User>(dataContext);
 
+
         public async Task<bool> SaveAsync()
         {
             return await dataContext.SaveChangesAsync()>0;

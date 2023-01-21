@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace InstaAPI.Model
+namespace InstaAPI.Model.DTOs
 {
-    public class UserAuth
+    public class LoginReq
     {
-        public string Username { get; set; }
+        public string Email { get; set; }
         public string Password { get; set; }
+        public string NickName { get; set; }
     }
 }
