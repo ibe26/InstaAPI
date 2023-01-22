@@ -17,10 +17,10 @@ namespace InstaAPI.Controllers
         public PostController(IUnitOfWork uow)
         {
             this.uow = uow;
-
         }
-        [HttpGet("{UserID}")]
-        public async Task<IActionResult> GetPosts(int UserID)
+
+        [HttpGet]
+        public async Task<IActionResult> GetPosts()
         {
             IEnumerable<Post> posts = await uow.PostRepository.GetListAsync();
             IEnumerable<User> users = await uow.UserRepository.GetListAsync();
@@ -56,9 +56,7 @@ namespace InstaAPI.Controllers
             };
 
             await uow.PostRepository.InsertAsync(post);
-            await uow.SaveAsync();
-
-            return Ok(200);
+            return Ok(await uow.SaveAsync());
 
         }
         ///api/post/like?PostID=1&UserID=5
@@ -81,8 +79,7 @@ namespace InstaAPI.Controllers
                 await uow
                 .WhoLikedRepository
                 .InsertAsync(whoLiked);
-                await uow.SaveAsync();
-                return Ok(200);
+                return Ok(await uow.SaveAsync());
 
             }
 

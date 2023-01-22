@@ -22,8 +22,29 @@ namespace InstaAPI.Controllers
         {
             this.uow = uow;
         }
+        [HttpGet]
+        public async Task<IActionResult> Users()
+        {
+            var users = await uow.UserRepository.GetListAsync();
+            return Ok(users.Select(u => new
+            {
+                u.UserID,
+                u.Nickname,
+                u.Email,
+            }));
+        }
 
-        
+        [HttpGet("{UserID}")]
+        public async Task<IActionResult> UserWithPosts(int UserID)
+        {
+            User User = await uow.UserRepository.SingleOrDefault(u => u.UserID == UserID);
+            IEnumerable<Post> Posts = await uow.PostRepository.Where(p => p.UserID == UserID);
+            User.Posts = Posts.ToList();
+
+            return Ok(User);
+        }
+
+
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDTO registerUser)
         {
