@@ -31,17 +31,25 @@ namespace InstaAPI.Controllers
                 u.UserID,
                 u.Nickname,
                 u.Email,
+                u.Posts
             }));
         }
 
         [HttpGet("{UserID}")]
         public async Task<IActionResult> UserWithPosts(int UserID)
         {
-            User User = await uow.UserRepository.SingleOrDefault(u => u.UserID == UserID);
+            User User = await uow.UserRepository.FindByID(UserID);
             IEnumerable<Post> Posts = await uow.PostRepository.Where(p => p.UserID == UserID);
             User.Posts = Posts.ToList();
 
-            return Ok(User);
+            var UserInfo = new
+            {
+                User.UserID,
+                User.Nickname,
+                User.Email,
+                User.Posts
+            };
+            return Ok(UserInfo);
         }
 
 
