@@ -31,7 +31,6 @@ namespace InstaAPI.Controllers
                 u.UserID,
                 u.Nickname,
                 u.Email,
-                u.Posts
             }));
         }
 
@@ -75,7 +74,7 @@ namespace InstaAPI.Controllers
             return Ok(user);
         }
 
-        [HttpGet("login")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDTO user)
         {
             var FoundUser = await uow.UserRepository.SingleOrDefault(u => u.Email == user.Email);
