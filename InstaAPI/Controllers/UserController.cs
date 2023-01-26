@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
+using System.Reflection.Metadata.Ecma335;
 
 namespace InstaAPI.Controllers
 {
@@ -77,23 +78,52 @@ namespace InstaAPI.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDTO user)
         {
-            var FoundUser = await uow.UserRepository.SingleOrDefault(u => u.Email == user.Email);
+            //First check if user exists. If not, break.
+            //Then Check if User Token exists. If exists,Check passwords. If doesn't match, break. If matches, return current token.
+            //If User Token doesn't exists, check for password validation.If matches, create new token and return the current.
+
+            User FoundUser = await uow.UserRepository.SingleOrDefault(u => u.Email == user.Email);
             if (FoundUser is null)
             {
                 return BadRequest("User doesn't exist.");
             }
+            if (await uow.UserTokenRepository.AnyAsync(u => u.UserID == FoundUser.UserID))
+            {
+
+                if (!MatchPassword(user.Password, FoundUser.Password, FoundUser.PasswordKey))
+                {
+                    return BadRequest("Please Check e-mail or password entered.");
+                }
+
+                return Ok(uow.UserTokenRepository.SingleOrDefault(u => u.UserID == FoundUser.UserID).Result.Token);
+            }
+
             if (!MatchPassword(user.Password, FoundUser.Password, FoundUser.PasswordKey))
             {
                 return BadRequest("Please Check e-mail or password entered.");
             }
 
-            User result = await uow.UserRepository.SingleOrDefault(u => u.Email == user.Email);
-
-            return Ok(new
+            string Token = CreateJWT(user);
+            if (!string.IsNullOrEmpty(Token))
             {
-                PostID = result.UserID,
-                Token = CreateJWT(user)
-            });
+                UserToken userToken = new UserToken() { UserID = FoundUser.UserID, Token = Token };
+                await uow.UserTokenRepository.InsertAsync(userToken);
+            }
+
+            //Checks whether any changes made on database.
+            if (await uow.SaveAsync())
+            {
+                return Ok(Token);
+            }
+            return BadRequest("Couldn't get User Token");
+
+        }
+
+        [HttpDelete("logout/{UserID}")]
+        public async Task<IActionResult> Logout(int UserID)
+        {
+            if (await uow.UserTokenRepository.AnyAsync(u => u.UserID == UserID)) { return BadRequest("User Doesn't exist."); }
+            return Ok(uow.UserTokenRepository.DeleteAsync(UserID));
         }
 
         private string CreateJWT(LoginDTO user)
@@ -133,6 +163,7 @@ namespace InstaAPI.Controllers
                 return true;
             }
         }
+
 
     }
 }

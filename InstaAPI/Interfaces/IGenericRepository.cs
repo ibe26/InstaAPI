@@ -15,6 +15,7 @@ namespace InstaAPI.Interfaces
         public Task<TEntity> FindByID(int ID);
         public Task<IEnumerable<TEntity>> Where(Expression<Func<TEntity, bool>> predicate);
         public Task<TEntity> SingleOrDefault(Expression<Func<TEntity, bool>> predicate);
+        public Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate);
         public Task Patch(int ID, JsonPatchDocument TEntity);
     }
 }

@@ -12,6 +12,7 @@ namespace InstaAPI.Interfaces
         public IGenericRepository<Comment> CommentRepository { get; }
         public IGenericRepository<WhoLiked> WhoLikedRepository { get; }
         public IGenericRepository<User> UserRepository { get; }
+        public IGenericRepository<UserToken> UserTokenRepository { get; }
         public Task<bool> SaveAsync();
     }
 }

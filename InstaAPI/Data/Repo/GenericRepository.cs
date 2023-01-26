@@ -19,6 +19,12 @@ namespace InstaAPI.Data.Repo
             this.dataContext = dataContext;
             _object = dataContext.Set<TEntity>();
         }
+
+        public Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate)
+        {
+            return _object.AnyAsync(predicate);
+        }
+
         public async Task DeleteAsync(int ID)
         {
             TEntity TEntity = await FindByID(ID);
