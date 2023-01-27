@@ -95,10 +95,8 @@ namespace InstaAPI.Controllers
             {
                 var whoLiked = uow
                 .WhoLikedRepository
-                .GetListAsync()
+                .SingleOrDefault(p => p.UserID == UserID && p.PostID == PostID)
                 .Result
-                .Where(p => p.UserID == UserID && p.PostID == PostID)
-                .FirstOrDefault()
                 .ID;
 
                 await uow
