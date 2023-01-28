@@ -36,8 +36,7 @@ namespace InstaAPI.Controllers
                              post.Text,
                              post.Title,
                              post.WhoLiked,
-                             user.Nickname,
-
+                             user.Nickname
                          };
             return Ok(result);
         }
@@ -63,16 +62,16 @@ namespace InstaAPI.Controllers
         [HttpPost("like")]
         public async Task<IActionResult> LikePost(int UserID, int PostID)
         {
-            if (!uow.PostRepository.GetListAsync().Result.Any(p => p.ID == PostID))
+            if (!await uow.WhoLikedRepository.AnyAsync(p => p.ID == PostID))
             {
                 return BadRequest("Attempted to like a post that doesn't exist.");
             }
-            if (!uow.UserRepository.GetListAsync().Result.Any(u => u.UserID == UserID))
+            if (!await uow.WhoLikedRepository.AnyAsync(u => u.UserID == UserID))
             {
                 return BadRequest("A non-existing user tried to like a post");
             }
 
-            if (!uow.WhoLikedRepository.GetListAsync().Result.Any(p => p.UserID == UserID && p.PostID == PostID))
+            if (!await uow.WhoLikedRepository.AnyAsync(p => p.UserID == UserID && p.PostID == PostID))
             {
                 var whoLiked = new WhoLiked() { PostID = PostID, UserID = UserID };
 
@@ -80,9 +79,7 @@ namespace InstaAPI.Controllers
                 .WhoLikedRepository
                 .InsertAsync(whoLiked);
                 return Ok(await uow.SaveAsync());
-
             }
-
             return BadRequest("Either a non-existing user tried to like or the post doesn't exist.");
         }
 
@@ -91,7 +88,7 @@ namespace InstaAPI.Controllers
         {
             //Checking if this UserID liked this post before
 
-            if (uow.WhoLikedRepository.GetListAsync().Result.Any(p => p.UserID == UserID && p.PostID == PostID))
+            if (await uow.WhoLikedRepository.AnyAsync(p => p.UserID == UserID && p.PostID == PostID))
             {
                 var whoLiked = uow
                 .WhoLikedRepository
@@ -103,15 +100,13 @@ namespace InstaAPI.Controllers
                 .WhoLikedRepository
                 .DeleteAsync(whoLiked);
 
-                await uow.SaveAsync();
-                return Ok(200);
+                if (await uow.SaveAsync())
+                {
+                    return Ok(200);
+                }
+
             }
-
-
             return BadRequest("Attempted to unlike the post, even though didn't like.");
         }
-
-
-
     }
 }

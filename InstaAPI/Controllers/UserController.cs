@@ -122,8 +122,19 @@ namespace InstaAPI.Controllers
         [HttpDelete("logout/{UserID}")]
         public async Task<IActionResult> Logout(int UserID)
         {
-            if (await uow.UserTokenRepository.AnyAsync(u => u.UserID == UserID)) { return BadRequest("User Doesn't exist."); }
-            return Ok(uow.UserTokenRepository.DeleteAsync(UserID));
+            if (!await uow.UserTokenRepository.AnyAsync(u => u.UserID == UserID))
+            {
+                return BadRequest("User Doesn't exist.");
+            }
+
+            int ID = uow.UserTokenRepository.SingleOrDefault(u => u.UserID == UserID).Result.ID;
+            await uow.UserTokenRepository.DeleteAsync(ID);
+
+            if (await uow.SaveAsync())
+            {
+                return Ok();
+            }
+            return BadRequest();
         }
 
         private string CreateJWT(LoginDTO user)

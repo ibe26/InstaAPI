@@ -28,7 +28,10 @@ namespace InstaAPI.Data.Repo
         public async Task DeleteAsync(int ID)
         {
             TEntity TEntity = await FindByID(ID);
-            _object.Remove(TEntity);
+            if (TEntity != null)
+            {
+                _object.Remove(TEntity);
+            }
         }
 
         public async Task<TEntity> FindByID(int ID)
