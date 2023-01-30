@@ -62,11 +62,11 @@ namespace InstaAPI.Controllers
         [HttpPost("like")]
         public async Task<IActionResult> LikePost(int UserID, int PostID)
         {
-            if (!await uow.WhoLikedRepository.AnyAsync(p => p.ID == PostID))
+            if (!await uow.PostRepository.AnyAsync(p => p.ID == PostID))
             {
                 return BadRequest("Attempted to like a post that doesn't exist.");
             }
-            if (!await uow.WhoLikedRepository.AnyAsync(u => u.UserID == UserID))
+            if (!await uow.UserRepository.AnyAsync(u => u.UserID == UserID))
             {
                 return BadRequest("A non-existing user tried to like a post");
             }
