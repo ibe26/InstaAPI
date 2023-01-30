@@ -56,6 +56,10 @@ namespace InstaAPI.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDTO registerUser)
         {
+            if (await uow.UserRepository.AnyAsync(u => u.Nickname == registerUser.NickName || u.Email == registerUser.Email))
+            {
+                return BadRequest("User Alrady Exists.");
+            }
             byte[] passwordHash, passwordKey;
             using (var hmac = new HMACSHA256())
             {
@@ -95,7 +99,9 @@ namespace InstaAPI.Controllers
                     return BadRequest("Please Check e-mail or password entered.");
                 }
 
-                return Ok(uow.UserTokenRepository.SingleOrDefault(u => u.UserID == FoundUser.UserID).Result.Token);
+
+
+                return Ok(Json(new { token = uow.UserTokenRepository.SingleOrDefault(u => u.UserID == FoundUser.UserID).Result.Token }).Value);
             }
 
             if (!MatchPassword(user.Password, FoundUser.Password, FoundUser.PasswordKey))
@@ -113,7 +119,7 @@ namespace InstaAPI.Controllers
             //Checks whether any changes made on database.
             if (await uow.SaveAsync())
             {
-                return Ok(Token);
+                return Ok(Json(new { token = Token }).Value);
             }
             return BadRequest("Couldn't get User Token");
 
@@ -135,6 +141,17 @@ namespace InstaAPI.Controllers
                 return Ok();
             }
             return BadRequest();
+        }
+
+        [HttpGet("token/{UserID}")]
+        public async Task<IActionResult> GetToken(int UserID)
+        {
+            UserToken user = await uow.UserTokenRepository.SingleOrDefault(u => u.UserID == UserID);
+            if (user == null)
+            {
+                return BadRequest("User Token not found. ");
+            }
+            return Ok(user);
         }
 
         private string CreateJWT(LoginDTO user)
