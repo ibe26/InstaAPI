@@ -11,6 +11,7 @@ using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Reflection.Metadata.Ecma335;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 namespace InstaAPI.Controllers
 {
@@ -91,68 +92,39 @@ namespace InstaAPI.Controllers
             {
                 return BadRequest("User doesn't exist.");
             }
-            if (await uow.UserTokenRepository.AnyAsync(u => u.UserID == FoundUser.UserID))
+            if (await uow.UserRepository.AnyAsync(u => u.UserID == FoundUser.UserID))
             {
-
                 if (!MatchPassword(user.Password, FoundUser.Password, FoundUser.PasswordKey))
                 {
                     return BadRequest("Please Check e-mail or password entered.");
                 }
-
-
-
-                return Ok(Json(new { token = uow.UserTokenRepository.SingleOrDefault(u => u.UserID == FoundUser.UserID).Result.Token }).Value);
             }
-
-            if (!MatchPassword(user.Password, FoundUser.Password, FoundUser.PasswordKey))
-            {
-                return BadRequest("Please Check e-mail or password entered.");
-            }
-
             string Token = CreateJWT(user);
-            if (!string.IsNullOrEmpty(Token))
+            if (Token == null)
             {
-                UserToken userToken = new UserToken() { UserID = FoundUser.UserID, Token = Token };
-                await uow.UserTokenRepository.InsertAsync(userToken);
+                return BadRequest();
             }
-
-            //Checks whether any changes made on database.
-            if (await uow.SaveAsync())
-            {
-                return Ok(Json(new { token = Token }).Value);
-            }
-            return BadRequest("Couldn't get User Token");
+            return Ok(new {nickname=FoundUser.Nickname,Token=Token});
 
         }
 
-        [HttpDelete("logout/{UserID}")]
-        public async Task<IActionResult> Logout(int UserID)
-        {
-            if (!await uow.UserTokenRepository.AnyAsync(u => u.UserID == UserID))
-            {
-                return BadRequest("User Doesn't exist.");
-            }
+        //[HttpDelete("logout/{UserID}")]
+        //public async Task<IActionResult> Logout(int UserID)
+        //{
+        //    if (!await uow.UserTokenRepository.AnyAsync(u => u.UserID == UserID))
+        //    {
+        //        return BadRequest("User Doesn't exist.");
+        //    }
 
-            int ID = uow.UserTokenRepository.SingleOrDefault(u => u.UserID == UserID).Result.ID;
-            await uow.UserTokenRepository.DeleteAsync(ID);
+        //    int ID = uow.UserTokenRepository.SingleOrDefault(u => u.UserID == UserID).Result.ID;
+        //    await uow.UserTokenRepository.DeleteAsync(ID);
 
-            if (await uow.SaveAsync())
-            {
-                return Ok();
-            }
-            return BadRequest();
-        }
-
-        [HttpGet("token/{UserID}")]
-        public async Task<IActionResult> GetToken(int UserID)
-        {
-            UserToken user = await uow.UserTokenRepository.SingleOrDefault(u => u.UserID == UserID);
-            if (user == null)
-            {
-                return BadRequest("User Token not found. ");
-            }
-            return Ok(user);
-        }
+        //    if (await uow.SaveAsync())
+        //    {
+        //        return Ok();
+        //    }
+        //    return BadRequest();
+        //}
 
         private string CreateJWT(LoginDTO user)
         {

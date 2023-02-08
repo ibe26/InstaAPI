@@ -41,11 +41,9 @@ namespace InstaAPI.Controllers
             return Ok(result);
         }
 
-        [HttpPost("add")]
-        public async Task<IActionResult> AddPost(PostDTO postDTO)
+        public Post GetPost(PostDTO postDTO)
         {
-
-            Post post = new Post()
+            return new Post()
             {
                 Date = DateTime.Now.Date,
                 Image = postDTO.Image,
@@ -53,7 +51,21 @@ namespace InstaAPI.Controllers
                 Title = postDTO.Title,
                 UserID = postDTO.UserID,
             };
+        }
 
+        [HttpPost("add")]
+        public async Task<IActionResult> AddPost(PostDTO postDTO)
+        {
+            Post post = new Post()
+            {
+                Date = DateTime.Now.Date,
+                Image = postDTO.Image,
+                Text = postDTO.Text,
+                Title = postDTO.Title,
+                UserID = postDTO.UserID,
+                WhoLiked = null
+
+            };
             await uow.PostRepository.InsertAsync(post);
             return Ok(await uow.SaveAsync());
 
